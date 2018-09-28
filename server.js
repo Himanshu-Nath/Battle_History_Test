@@ -21,8 +21,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 var Battle = require('./server/routes/battle');
 app.post('/api/csv/upload', Battle.uploadBattleFile);
-app.get('/api/battle/places', Battle.getBattlesPlace);
+app.get('/api/battle/list', Battle.getBattlesPlace);
 app.get('/api/battle/count', Battle.getBattlesCount);
+app.get('/api/battle/search', Battle.getSearchedBattle);
 
 app.use('/node_modules', express.static(__dirname + '/node_modules'));
 

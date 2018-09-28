@@ -74,6 +74,38 @@ module.exports = {
                 }                
             }
         });
+    },
+
+    getSearchedBattle: function(req, res) {
+        logger.info(req.query);
+        let searchQuery = {};
+        if(req.query.type) {
+            searchQuery.battle_type = req.query.type;
+        }
+        if(req.query.location) {
+            searchQuery.location = req.query.location;
+        }
+        if(req.query.king) {
+            let king = new RegExp(req.query.king, 'i');
+            searchQuery.$or = [ 
+                {attacker_king: king }, 
+                {defender_king: king } 
+            ];
+        }
+        Battle.find(searchQuery, function(err, result) {
+            if(err) {
+                logger.error('getSearchedBattle: error while searching battle: ' + err);
+                res.send({ status: false, message: constant.FAIL, devMsg: "error while finding battle count", err });
+            } else {
+                if(result != null) {
+                    logger.info('getSearchedBattle: successfully got the battle result');
+                    res.send({ status: true, message: constant.SUCCESS, result });         
+                } else {
+                    logger.error('getSearchedBattle: failed to get the battle result');
+                    res.send({ status: false, message: constant.FAIL, devMsg: "failed to get the battle result" });
+                }                
+            }
+        });
     }
 
 }
