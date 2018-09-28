@@ -33,7 +33,4 @@ app.use('/node_modules', express.static(__dirname + '/node_modules'));
 
 app.listen(constant.PORT, function () {
     logger.info("Server is running at port: " + constant.PORT);
-    // logger.warn("Server is running at port: " + consts.PORT);
-    // logger.error("Server is running at port: " + consts.PORT);
-    // logger.fatal("Server is running at port: " + consts.PORT);
 });

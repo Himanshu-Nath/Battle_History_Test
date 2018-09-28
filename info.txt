@@ -1,0 +1,156 @@
+                                                Varoius APIs details:
+
+                                                        STEP: 1
+
+Generate authentication token to access routes
+https://instarem-battle-apis.herokuapp.com/api/battle/token (GET)
+Response:
+    {
+        "status": true,
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9qZWN0IjoiQmF0dGxlIEFQSXMiLCJjb21wYW55IjoiSW5zdGFyZW0iLCJpYXQiOjE1MzgxNjA3OTYsImV4cCI6MTUzODE2NDM5Nn0.j9q5lNCPZx-o-6OIOCR43rfclDyI7E2Nd11dKr4vgVI"
+    }
+
+
+                                                        STEP: 2
+
+
+Uploading CSV file
+(for one time only, the next time when you hit then "Record already present" response will come)
+https://instarem-battle-apis.herokuapp.com/api/csv/upload (POST)
+Header:
+    KEY: Authorization
+    VALUE: https://instarem-battle-apis.herokuapp.com/api/battle/token (Response token)
+Response:
+    {
+        "status": true,
+        "message": "SUCCESS",
+        "count": 38,
+        "devMsg": "Record already present"
+    }
+
+
+---------------------------------------------------------------------------------------------------------------
+
+
+Battle List
+(Location and region name where battle helds)
+https://instarem-battle-apis.herokuapp.com/api/battle/list (GET)
+Header:
+    KEY: Authorization
+    VALUE: https://instarem-battle-apis.herokuapp.com/api/battle/token (Response token)
+Response:
+    {
+        "status": true,
+        "result": [
+            {
+                "_id": null,
+                "places": [
+                    "Castle Black , Beyond the Wall",
+                    "Crag , The Westerlands",
+                    "Darry , The Riverlands",
+                    ------------------------ (etc)
+                ]
+            }
+        ]
+    }
+
+
+---------------------------------------------------------------------------------------------------------------
+
+
+Battle Count
+https://instarem-battle-apis.herokuapp.com/api/battle/count (GET)
+Header:
+    KEY: Authorization
+    VALUE: https://instarem-battle-apis.herokuapp.com/api/battle/token (Response token)
+Response:
+    {
+        "status": true,
+        "message": "SUCCESS",
+        "battleOccurred": 38
+    }
+
+
+---------------------------------------------------------------------------------------------------------------
+
+
+Battle Search
+(Searching with multiple conditions like king name, battle type, and location)
+https://instarem-battle-apis.herokuapp.com/api/battle/search?king=Stannis Baratheon&type=pitched battle&location=King's Landing (GET)
+https://instarem-battle-apis.herokuapp.com/api/battle/search?king=&type=pitched battle&location=King's Landing (GET)
+https://instarem-battle-apis.herokuapp.com/api/battle/search?king=Stannis Baratheon&type=&location= (GET)
+Header:
+    KEY: Authorization
+    VALUE: https://instarem-battle-apis.herokuapp.com/api/battle/token (Response token)
+Response:
+    {
+        "status": true,
+        "message": "SUCCESS",
+        "result": [
+            {
+                "_id": "5badc5005ff5a032f8c7b542",
+                "name": "Battle of the Blackwater",
+                "year": 299,
+                "battle_number": 20,
+                "attacker_king": "Stannis Baratheon",
+                "defender_king": "Joffrey/Tommen Baratheon",
+                "attacker_1": "Baratheon",
+                "defender_1": "Lannister",
+                "attacker_outcome": "loss",
+                "battle_type": "pitched battle",
+                "major_death": 1,
+                "major_capture": 1,
+                "attacker_size": 21000,
+                "defender_size": 7250,
+                "attacker_commander": "Stannis Baratheon, Imry Florent, Guyard Morrigen, Rolland Storm, Salladhor Saan, Davos Seaworth",
+                "defender_commander": "Tyrion Lannister, Jacelyn Bywater, Sandor Clegane, Tywin Lannister, Garlan Tyrell, Mace Tyrell, Randyll Tarly",
+                "summer": 1,
+                "location": "King's Landing",
+                "region": "The Crownlands",
+                "cot": "2018-09-28T06:06:56.167Z",
+                "mot": "2018-09-28T06:06:56.167Z"
+            }
+        ]
+    }
+
+
+---------------------------------------------------------------------------------------------------------------
+
+
+Battle stats
+https://instarem-battle-apis.herokuapp.com/api/battle/stats (GET)
+Header:
+    KEY: Authorization
+    VALUE: https://instarem-battle-apis.herokuapp.com/api/battle/token (Response token)
+Response:
+    {
+        "status": true,
+        "result": [
+            {
+                "attacker_outcome": {
+                    "win": 32,
+                    "loss": 5
+                },
+                "battle_type": [
+                    "siege",
+                    "ambush",
+                    "razing",
+                    "pitched battle"
+                ],
+                "defender_size": {
+                    "average": 6428.1578947368425,
+                    "min": 100,
+                    "max": 20000
+                },
+                "most_active": {
+                    "attacker_king": "Joffrey/Tommen Baratheon",
+                    "defender_king": "Robb Stark",
+                    "region": "The Riverlands",
+                    "name": "Battle of Castle Black"
+                }
+            }
+        ]
+    }
+
+
+---------------------------------------------------------------------------------------------------------------
