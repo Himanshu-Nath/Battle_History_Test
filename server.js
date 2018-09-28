@@ -20,11 +20,14 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 var Battle = require('./server/routes/battle');
-app.post('/api/csv/upload', Battle.uploadBattleFile);
-app.get('/api/battle/list', Battle.getBattlesPlace);
-app.get('/api/battle/count', Battle.getBattlesCount);
-app.get('/api/battle/search', Battle.getSearchedBattle);
-app.get('/api/battle/stats', Battle.getBattleStats);
+var BattleServiceImpl = require('./server/serviceImpl/battleServiceImpl');
+
+app.get('/api/battle/token', Battle.generateJWTToken);
+app.post('/api/csv/upload', BattleServiceImpl.checkToken, Battle.uploadBattleFile);
+app.get('/api/battle/list', BattleServiceImpl.checkToken, Battle.getBattlesPlace);
+app.get('/api/battle/count', BattleServiceImpl.checkToken, Battle.getBattlesCount);
+app.get('/api/battle/search', BattleServiceImpl.checkToken, Battle.getSearchedBattle);
+app.get('/api/battle/stats', BattleServiceImpl.checkToken, Battle.getBattleStats);
 
 app.use('/node_modules', express.static(__dirname + '/node_modules'));
 

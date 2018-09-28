@@ -39,14 +39,22 @@ module.exports = {
                 callback();
             }
         ],
-            function (err, results) {
-                if (err) {
-                    logger.debug('Error while calling first series ' + err);
-                }
-                logger.debug('addBattleDataToDB: Record inserted succesfully of battle_history');
-                res.send({ status: true, message: constant.SUCCESS, developerInfo: 'Record inserted succesfully' });                
-            });
-
-
-    }    
+        function (err, results) {
+            if (err) {
+                logger.debug('Error while calling first series ' + err);
+            }
+            logger.debug('addBattleDataToDB: Record inserted succesfully of battle_history');
+            res.send({ status: true, message: constant.SUCCESS, developerInfo: 'Record inserted succesfully' });                
+        });
+    } ,
+    
+    checkToken: function(req, res, next) {
+        const authToken = req.headers['authorization'];        
+        if(typeof authToken !== 'undefined') {    
+            req.token = authToken;
+            next();
+        } else {
+            res.sendStatus(403)
+        }
+    }
 }
