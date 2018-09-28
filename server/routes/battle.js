@@ -1,4 +1,5 @@
 require('../models/battle');
+const async = require('async');
 var Battle = mongoose.model('battleCollection');
 var logger = log4js.getLogger('battle.js');
 var battleServiceImple = require("../serviceImpl/battleServiceImpl");
@@ -56,7 +57,7 @@ module.exports = {
                 logger.info('getBattlesPlace: successfully got the battle places');
                 res.send({ status: true, message: constant.success, result });
             }
-        })
+        });
     },
 
     getBattlesCount: function(req, res) {
@@ -105,6 +106,165 @@ module.exports = {
                     res.send({ status: false, message: constant.FAIL, devMsg: "failed to get the battle result" });
                 }                
             }
+        });
+    },
+
+    getBattleStats: function(req, res) {
+        // Battle.aggregate([
+        //     {
+        //         $group: {
+        //             _id: {},
+        //             win_outcome: { 
+        //                 $sum: {
+        //                     $cond: [{ $eq: ["$attacker_outcome", "win"] }, 1, 0]
+        //                 } 
+        //             },
+        //             loss_outcome: { 
+        //                 $sum: {
+        //                     $cond: [{ $eq: ["$attacker_outcome", "loss"] }, 1, 0]
+        //                 } 
+        //             },
+        //             battle_type: { $addToSet:"$battle_type" },
+        //             average_defender: { $avg: "$defender_size" },
+        //             min_defender: {  $min: "$defender_size" },
+        //             max_defender: {  $max: "$defender_size" }
+        //         }
+        //     },
+        //     {
+        //         $project: {
+        //             _id: 0,
+        //             attacker_outcome: {
+        //                 win: "$win_outcome",
+        //                 loss: "$loss_outcome"
+        //             },
+        //             battle_type: "$battle_type",
+        //             defender_size: {
+        //                 average : "$average_defender",
+        //                 min : "$min_defender",
+        //                 max : "$max_defender",
+        //             }
+        //         }
+        //     }
+        // ], function (err, result) {
+        //     if (err) {
+        //         logger.error('getBattleStats: error while finding battle stats due to: ' + err);
+        //         res.status(500).send({ status: false, message: constant.FAIL, devMsg: "failed to get the battle stats", err });
+        //     } else {
+        //         logger.info('getBattleStats: successfully got the battle stats');
+        //         res.send({ status: true, message: constant.success, result });
+        //     }
+        // });
+
+
+        async.series([
+            function(callback) {
+                Battle.aggregate([
+                    { $group : { "_id": "$attacker_king", "count": { "$sum": 1 } } },
+                    { $sort : {"count" : -1} },
+                    { $project : {"attacker_king" : "$_id", "_id" : 0} } ,
+                    { $limit : 1 }
+                ], function (err, result) {
+                    if (err) {
+                        logger.error('getBattleStats: error for attacker_king: ' + err);
+                    } else {
+                        callback(null, result);
+                    }
+                });
+            },
+            function(callback) {
+                Battle.aggregate([
+                    { $group : { "_id": "$defender_king", "count": { "$sum": 1 } } },
+                    { $sort : {"count" : -1} },
+                    { $project : {"defender_king" : "$_id", "_id" : 0} } ,
+                    { $limit : 1 }
+                ], function (err, result) {
+                    if (err) {
+                        logger.error('getBattleStats: error for defender_king: ' + err);
+                    } else {
+                        callback(null, result);
+                    }
+                });
+            },
+            function(callback) {
+                Battle.aggregate([
+                    { $group : { "_id": "$region", "count": { "$sum": 1 } } },
+                    { $sort : {"count" : -1} },
+                    { $project : {"region" : "$_id", "_id" : 0} } ,
+                    { $limit : 1 }
+                ], function (err, result) {
+                    if (err) {
+                        logger.error('getBattleStats: error for region: ' + err);
+                    } else {
+                        callback(null, result);
+                    }
+                });
+            },
+            function(callback) {
+                Battle.aggregate([
+                    { $group : { _id: "$name", name: { $sum: { $add : [ '$attacker_size', '$defender_size' ] }}, } },
+                    { $sort : {"name" : -1} },
+                    { $limit : 1 }
+                ], function (err, result) {
+                    if (err) {
+                        logger.error('getBattleStats: error for region: ' + err);
+                    } else {
+                        callback(null, result);
+                    }
+                });
+            }
+        ],
+        function(err, results) {
+            console.log(results);
+            Battle.aggregate([
+                {
+                    $group: {
+                        _id: {},
+                        win_outcome: { 
+                            $sum: {
+                                $cond: [{ $eq: ["$attacker_outcome", "win"] }, 1, 0]
+                            } 
+                        },
+                        loss_outcome: { 
+                            $sum: {
+                                $cond: [{ $eq: ["$attacker_outcome", "loss"] }, 1, 0]
+                            } 
+                        },
+                        battle_type: { $addToSet:"$battle_type" },
+                        average_defender: { $avg: "$defender_size" },
+                        min_defender: {  $min: "$defender_size" },
+                        max_defender: {  $max: "$defender_size" }
+                    }
+                },
+                {
+                    $project: {
+                        _id: 0,
+                        attacker_outcome: {
+                            win: "$win_outcome",
+                            loss: "$loss_outcome"
+                        },
+                        battle_type: "$battle_type",
+                        defender_size: {
+                            average : "$average_defender",
+                            min : "$min_defender",
+                            max : "$max_defender",
+                        }
+                    }
+                }
+            ], function (err, result) {
+                if (err) {
+                    logger.error('getBattleStats: error while finding battle stats due to: ' + err);
+                    res.status(500).send({ status: false, message: constant.FAIL, devMsg: "failed to get the battle stats", err });
+                } else {
+                    result[0].most_active = {
+                        attacker_king: results[0][0].attacker_king,
+                        defender_king: results[1][0].defender_king,
+                        region: results[2][0].region,
+                        name: results[3][0]._id,
+                    }
+                    logger.info('getBattleStats: successfully got the battle stats');
+                    res.send({ status: true, message: constant.success, result });
+                }
+            });
         });
     }
 

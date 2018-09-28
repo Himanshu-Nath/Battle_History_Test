@@ -24,6 +24,7 @@ app.post('/api/csv/upload', Battle.uploadBattleFile);
 app.get('/api/battle/list', Battle.getBattlesPlace);
 app.get('/api/battle/count', Battle.getBattlesCount);
 app.get('/api/battle/search', Battle.getSearchedBattle);
+app.get('/api/battle/stats', Battle.getBattleStats);
 
 app.use('/node_modules', express.static(__dirname + '/node_modules'));
 
