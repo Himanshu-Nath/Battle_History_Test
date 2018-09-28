@@ -1,6 +1,8 @@
 var Schema = mongoose.Schema;
+const constant = require("../utils/constants");
 
 var BattleSchema = new Schema({
+    _id: Schema.Types.ObjectId,
     name: {type: String},
     year: {type: Number},
     battle_number: {type: Number},
@@ -25,6 +27,8 @@ var BattleSchema = new Schema({
     summer: {type: Number},
     location: {type: String},
     region: {type: String},
-    note: {type: String}
-}, {collection: 'battles_history'});
+    note: {type: String},
+    cot: {type: Date, default: Date.now },
+    mot: {type: Date, default: Date.now }
+}, {collection: constant.BATTLE_HISTORY_COLLECTON});
 mongoose.model('battleCollection', BattleSchema);
